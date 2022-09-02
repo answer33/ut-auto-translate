@@ -11,7 +11,9 @@
     "@remix-run/node": "^1.6.8",
     "@remix-run/react": "^1.6.8",
     "@remix-run/serve": "^1.6.8",
+    "ahooks": "^3.7.0",
     "antd": "^4.22.6",
+    "axios": "^0.27.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
@@ -20,6 +22,7 @@
     "@remix-run/eslint-config": "^1.6.8",
     "@types/react": "^18.0.15",
     "@types/react-dom": "^18.0.6",
+    "concurrently": "^7.3.0",
     "eslint": "^8.20.0",
     "typescript": "^4.7.4",
     "unocss": "^0.45.8"

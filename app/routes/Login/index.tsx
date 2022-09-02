@@ -20,7 +20,6 @@ const Login: React.FC = () => {
                 onFinish={onFinish}
                 onFinishFailed={onFinishFailed}
                 autoComplete="off"
-                width={800}
             >
                 <Form.Item
                     label="Username"
