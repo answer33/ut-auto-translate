@@ -1,0 +1,148 @@
+{
+  "name": "ut-auto-translate",
+  "displayName": "ut-auto-translate",
+  "description": "自动生成多语言翻译文案",
+  "version": "0.0.2",
+  "publisher": "answer",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/answer33/ut-auto-translate.git"
+  },
+  "keywords": [
+    "ut-auto-translate",
+    "auto-translate",
+    "translation",
+    "ai-translation",
+    "i18n",
+    "di18n",
+    "i18next",
+    "typescript",
+    "javascript",
+    "react"
+  ],
+  "engines": {
+    "vscode": "^1.97.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:javascript",
+    "onLanguage:javascriptreact",
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "ut-auto-translate.translate",
+        "title": "UT: 手动触发翻译"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "ut-auto-translate.translate",
+          "group": "ut-auto-translate",
+          "when": "editorLangId =~ /(javascript|javascriptreact|typescript|typescriptreact)/"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "UT Auto Translate",
+      "properties": {
+        "ut-auto-translate.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "启用或禁用自动翻译功能"
+        },
+        "ut-auto-translate.translationMode": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "manual"
+          ],
+          "default": "auto",
+          "description": "翻译模式：auto-保存时自动翻译，manual-手动触发翻译"
+        },
+        "ut-auto-translate.i18nLibrary": {
+          "type": "string",
+          "enum": [
+            "di18n",
+            "i18next"
+          ],
+          "default": "di18n",
+          "description": "多语言库类型：di18n-使用intl.t()，i18next-使用i18next.t()或t()"
+        },
+        "ut-auto-translate.localesDir": {
+          "type": "string",
+          "default": "locales",
+          "description": "多语言文件所在的目录路径（相对于项目根目录）"
+        },
+        "ut-auto-translate.languages": {
+          "type": "array",
+          "default": [
+            "zh-CN",
+            "en-US",
+            "es-ES",
+            "fr-FR",
+            "zh-TW"
+          ],
+          "description": "需要自动翻译的语言列表"
+        },
+        "ut-auto-translate.defaultLanguage": {
+          "type": "string",
+          "default": "zh-CN",
+          "description": "默认语言，用于从该语言翻译到其他语言"
+        },
+        "ut-auto-translate.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "SiliconFlow API密钥（如未设置将使用默认密钥）"
+        },
+        "ut-auto-translate.ignoreKeys": {
+          "type": "array",
+          "default": [],
+          "description": "忽略的键名列表"
+        },
+        "ut-auto-translate.ignorePaths": {
+          "type": "array",
+          "default": [],
+          "description": "忽略的文件路径列表（支持glob模式）"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.97.0",
+    "@typescript-eslint/eslint-plugin": "^8.31.1",
+    "@typescript-eslint/parser": "^8.31.1",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.5.2",
+    "eslint": "^9.25.1",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.8.3",
+    "webpack": "^5.99.7",
+    "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+    "axios": "^1.6.7",
+    "chinese-simple2traditional": "1.2.0",
+    "glob": "^10.3.10",
+    "simplecc-wasm": "^1.1.0"
+  }
+}
