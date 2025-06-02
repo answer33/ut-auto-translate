@@ -3,7 +3,7 @@
   "displayName": "ut-auto-translate",
   "description": "自动生成多语言翻译文案",
   "version": "0.0.1",
-  "publisher": "utcook",
+  "publisher": "answer",
   "icon": "images/logo.jpg",
   "repository": {
     "type": "git",
