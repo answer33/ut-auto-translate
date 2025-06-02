@@ -2,8 +2,9 @@
   "name": "ut-auto-translate",
   "displayName": "ut-auto-translate",
   "description": "自动生成多语言翻译文案",
-  "version": "0.0.2",
-  "publisher": "answer",
+  "version": "0.0.1",
+  "publisher": "utcook",
+  "icon": "images/logo.jpg",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/answer33/ut-auto-translate.git"

@@ -20,11 +20,6 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  // 注册命令：显示插件信息
-  const helloCommand = vscode.commands.registerCommand('ut-auto-translate.helloWorld', () => {
-    vscode.window.showInformationMessage('UT Auto Translate: 自动生成多语言翻译文案');
-  });
-
   // 注册文件保存事件监听器
   const saveListener = vscode.workspace.onDidSaveTextDocument(async (document) => {
     // 检查文件类型是否为JavaScript/TypeScript/React
@@ -42,7 +37,7 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   // 将所有注册的事件监听器和命令添加到上下文中
-  context.subscriptions.push(translateCommand, helloCommand, saveListener);
+  context.subscriptions.push(translateCommand, saveListener);
 }
 
 /**

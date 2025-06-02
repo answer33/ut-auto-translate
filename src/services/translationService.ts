@@ -42,10 +42,10 @@ export class TranslationService {
   ): Promise<string> {
     try {
       const apiKey = this.getApiKey();
-
-      // 提取文本中的变量占位符，如 {slot0}, {name} 等
+      
+      // 提取文本中的变量占位符，如 {slot0}, {{name}} 等
       const placeholders: string[] = [];
-      const placeholderRegex = /\{([^}]+)\}/g;
+      const placeholderRegex = /\{+[^}]+\}+/g;
       let match;
       while ((match = placeholderRegex.exec(text)) !== null) {
         placeholders.push(match[0]);
