@@ -2,7 +2,7 @@
   "name": "ut-auto-translate",
   "displayName": "ut-auto-translate",
   "description": "自动生成多语言翻译文案",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "answer",
   "icon": "images/logo.jpg",
   "repository": {

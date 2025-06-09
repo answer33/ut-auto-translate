@@ -1,4 +1,4 @@
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 /**
  * 多语言键提取器
@@ -6,18 +6,20 @@ import * as vscode from 'vscode';
  */
 export class IntlKeyExtractor {
   // 匹配intl.t(key, option)调用的正则表达式 (di18n)
-  private static readonly DI18N_PATTERN = /intl\.t\(['"]([^'"]+)['"](?:,\s*([^)]*))?\)/g;
-  
+  private static readonly DI18N_PATTERN =
+    /intl\.t\(\s*['"]([\s\S]*?)['"]\s*(?:,\s*([^)]*))?\)/g;
+
   // 匹配i18next.t(key, option)或t(key, option)调用的正则表达式 (i18next)
-  private static readonly I18NEXT_PATTERN = /(?:^|\s|\(|\.|;|,|\{|\})(?:i18next\.t|(?<!intl\.)t)\(['"]([^'"]+)['"](?:,\s*([^)]*))?\)/g;
+  private static readonly I18NEXT_PATTERN =
+    /(?:^|\s|\(|\.|;|,|\{|\})(?:i18next\.t|(?<!intl\.)t)\(\s*['"]([\s\S]*?)['"]\s*(?:,\s*([^)]*))?\)/g;
 
   /**
    * 获取当前配置的多语言库类型
    * @returns 多语言库类型
    */
   private static getI18nLibraryType(): string {
-    const config = vscode.workspace.getConfiguration('ut-auto-translate');
-    return config.get<string>('i18nLibrary', 'di18n');
+    const config = vscode.workspace.getConfiguration("ut-auto-translate");
+    return config.get<string>("i18nLibrary", "di18n");
   }
 
   /**
@@ -29,10 +31,11 @@ export class IntlKeyExtractor {
     const keys: string[] = [];
     let match;
     const libraryType = this.getI18nLibraryType();
-    
+
     // 根据配置选择使用的正则表达式
-    const pattern = libraryType === 'i18next' ? this.I18NEXT_PATTERN : this.DI18N_PATTERN;
-    
+    const pattern =
+      libraryType === "i18next" ? this.I18NEXT_PATTERN : this.DI18N_PATTERN;
+
     // 重置正则表达式的lastIndex
     pattern.lastIndex = 0;
 
@@ -52,7 +55,9 @@ export class IntlKeyExtractor {
    * @param document 文档对象
    * @returns 提取到的键数组
    */
-  public static extractKeysFromDocument(document: vscode.TextDocument): string[] {
+  public static extractKeysFromDocument(
+    document: vscode.TextDocument
+  ): string[] {
     const content = document.getText();
     return this.extractKeysFromContent(content);
   }
@@ -63,13 +68,13 @@ export class IntlKeyExtractor {
    * @returns 是否应该忽略
    */
   public static shouldIgnoreKey(key: string): boolean {
-    const config = vscode.workspace.getConfiguration('ut-auto-translate');
-    const ignoreKeys = config.get<string[]>('ignoreKeys', []);
-    
-    return ignoreKeys.some(pattern => {
+    const config = vscode.workspace.getConfiguration("ut-auto-translate");
+    const ignoreKeys = config.get<string[]>("ignoreKeys", []);
+
+    return ignoreKeys.some((pattern) => {
       // 支持通配符匹配
-      if (pattern.includes('*')) {
-        const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
+      if (pattern.includes("*")) {
+        const regex = new RegExp("^" + pattern.replace(/\*/g, ".*") + "$");
         return regex.test(key);
       }
       return key === pattern;
@@ -82,13 +87,13 @@ export class IntlKeyExtractor {
    * @returns 是否应该忽略
    */
   public static shouldIgnorePath(filePath: string): boolean {
-    const config = vscode.workspace.getConfiguration('ut-auto-translate');
-    const ignorePaths = config.get<string[]>('ignorePaths', []);
-    
-    return ignorePaths.some(pattern => {
+    const config = vscode.workspace.getConfiguration("ut-auto-translate");
+    const ignorePaths = config.get<string[]>("ignorePaths", []);
+
+    return ignorePaths.some((pattern) => {
       // 支持glob模式匹配
-      if (pattern.includes('*')) {
-        const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
+      if (pattern.includes("*")) {
+        const regex = new RegExp("^" + pattern.replace(/\*/g, ".*") + "$");
         return regex.test(filePath);
       }
       return filePath === pattern;
