@@ -3,6 +3,7 @@ import * as path from 'path';
 import { IntlKeyExtractor } from '../utils/intlKeyExtractor';
 import { LocaleFileUtils } from '../utils/localeFileUtils';
 import { TranslationService } from './translationService';
+import { TranslationLock } from '../utils/translationLock';
 
 /**
  * 翻译任务接口
@@ -30,6 +31,13 @@ export class AutoTranslateService {
   private static debounceTimer: NodeJS.Timeout | null = null;
   // 防抖延迟时间（毫秒）
   private static readonly DEBOUNCE_DELAY = 500;
+
+  /**
+   * 获取当前等待中的自动/手动翻译任务数量（不包含正在处理中的批次）
+   */
+  public static getQueuedCount(): number {
+    return this.translationQueue.length;
+  }
   /**
    * 处理文件保存事件（入口方法）
    * @param document 保存的文档
@@ -71,39 +79,54 @@ export class AutoTranslateService {
     this.translationQueue = [];
     this.pendingKeys.clear();
 
+    // 若正在同步，提示排队中
+    let queuedStatus: vscode.Disposable | undefined;
     try {
-      // 收集所有待翻译的键
-      const allKeysToTranslate = new Set<string>();
-      const workspaceFolders = new Set<string>();
-      
-      for (const task of currentQueue) {
+      const maybeSync = (() => {
         try {
-          const keys = await this.extractKeysFromTask(task);
-          keys.forEach(key => allKeysToTranslate.add(key));
-          
-          const workspaceFolder = vscode.workspace.getWorkspaceFolder(task.document.uri);
-          if (workspaceFolder) {
-            workspaceFolders.add(workspaceFolder.uri.fsPath);
+          const { SyncTranslateService } = require('./syncTranslateService');
+          return SyncTranslateService && typeof SyncTranslateService.isSyncing === 'function' && SyncTranslateService.isSyncing();
+        } catch { return false; }
+      })();
+      if (TranslationLock.isLocked() && maybeSync) {
+        queuedStatus = vscode.window.setStatusBarMessage('UT: 自动/手动翻译已排队（正在同步）');
+      }
+
+      await TranslationLock.runExclusive(async () => {
+        // 收集所有待翻译的键
+        const allKeysToTranslate = new Set<string>();
+        const workspaceFolders = new Set<string>();
+
+        for (const task of currentQueue) {
+          try {
+            const keys = await this.extractKeysFromTask(task);
+            keys.forEach(key => allKeysToTranslate.add(key));
+
+            const workspaceFolder = vscode.workspace.getWorkspaceFolder(task.document.uri);
+            if (workspaceFolder) {
+              workspaceFolders.add(workspaceFolder.uri.fsPath);
+            }
+          } catch (error) {
+            console.error(`提取键失败: ${task.document.uri.fsPath}`, error);
           }
-        } catch (error) {
-          console.error(`提取键失败: ${task.document.uri.fsPath}`, error);
         }
-      }
 
-      // 如果有键需要翻译，执行批量翻译
-      if (allKeysToTranslate.size > 0 && workspaceFolders.size > 0) {
-        // 假设所有文件都在同一个工作区（通常情况）
-        const workspaceRoot = Array.from(workspaceFolders)[0];
-        await this.performBatchTranslation(Array.from(allKeysToTranslate), workspaceRoot);
-      }
+        // 如果有键需要翻译，执行批量翻译
+        if (allKeysToTranslate.size > 0 && workspaceFolders.size > 0) {
+          // 假设所有文件都在同一个工作区（通常情况）
+          const workspaceRoot = Array.from(workspaceFolders)[0];
+          await this.performBatchTranslation(Array.from(allKeysToTranslate), workspaceRoot);
+        }
 
-      // 标记所有任务为完成
-      currentQueue.forEach(task => task.resolve());
+        // 标记所有任务为完成
+        currentQueue.forEach(task => task.resolve());
+      });
     } catch (error) {
       console.error('批量翻译失败', error);
       // 标记所有任务为失败
       currentQueue.forEach(task => task.reject(error));
     } finally {
+      if (queuedStatus) queuedStatus.dispose();
       this.isProcessing = false;
       
       // 如果在处理过程中又有新任务，继续处理
@@ -211,9 +234,14 @@ export class AutoTranslateService {
          const targetLocaleContent = LocaleFileUtils.readLocaleFile(targetLocaleFilePath);
 
          // 找出需要翻译的键（在目标语言文件中不存在的键）
-         const keysToTranslateForTarget = finalKeysToTranslate.filter(
-           key => !Object.prototype.hasOwnProperty.call(targetLocaleContent, key)
-         );
+         const keysToTranslateForTarget = finalKeysToTranslate.filter((key) => {
+           if (!Object.prototype.hasOwnProperty.call(targetLocaleContent, key)) return true;
+           const v = (targetLocaleContent as any)[key];
+           // 目标语言中为空或仅引号的值视为缺失，需补齐
+           if (v === null || v === undefined) return true;
+           const s = String(v).trim();
+           return !s || /^["'“”‘’「」『』]+$/.test(s);
+         });
 
          if (keysToTranslateForTarget.length === 0) {
            continue;

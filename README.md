@@ -43,6 +43,15 @@
 1. 打开命令面板（`Ctrl+Shift+P` 或 `Cmd+Shift+P`）
 2. 输入 "UT: 手动触发翻译" 并选择
 
+### 一键同步翻译（从中文基准）
+
+当新增了一个语言（或分支合并后中文基准有新增键）时，可以通过以下方式一键同步：
+
+1. 在 VSCode 命令面板输入："UT: 一键同步翻译（从中文基准）"
+2. 插件会以默认语言文件（如 `zh-CN.json`，由 `ut-auto-translate.defaultLanguage` 指定）为基准
+3. 对所有配置的其他语言（`ut-auto-translate.languages`）缺失的键进行批量翻译并写入对应语言文件
+4. 若某语言文件不存在会自动创建；已存在的键不会被修改，仅补齐缺失键
+
 ### 翻译模式
 
 插件支持两种翻译模式：
@@ -76,6 +85,10 @@
 | `ut-auto-translate.ignorePaths` | Array | `[]` | 忽略的文件路径列表（支持 glob 模式） |
 | `ut-auto-translate.translationMode` | String | `"auto"` | 翻译模式，可选值：`"auto"` 或 `"manual"` |
 | `ut-auto-translate.i18nLibrary` | String | `"di18n"` | 多语言库类型，可选值：`"di18n"` 或 `"i18next"` |
+| `ut-auto-translate.enableCache` | Boolean | `true` | 启用本地翻译缓存，减少重复翻译请求 |
+| `ut-auto-translate.batchCharLimit` | Number | `1800` | 单次批量请求的字符限制（按总字符估算分批） |
+
+> 提示：一键同步翻译依赖默认语言文件作为基准（通常为 `zh-CN.json`）。请确保该文件存在并包含最新的中文键值。
 
 ## 示例
 

@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { AutoTranslateService } from './services/autoTranslateService';
+import { SyncTranslateService } from './services/syncTranslateService';
 
 /**
  * 插件激活时调用此方法
@@ -20,6 +21,16 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
+  // 注册命令：一键同步翻译（以中文基准）
+  const syncCommand = vscode.commands.registerCommand('ut-auto-translate.syncTranslations', async () => {
+    try {
+      await SyncTranslateService.syncFromDefaultBaseline();
+    } catch (error) {
+      console.error('一键同步翻译失败', error);
+      vscode.window.showErrorMessage(`一键同步翻译失败: ${error}`);
+    }
+  });
+
   // 注册文件保存事件监听器
   const saveListener = vscode.workspace.onDidSaveTextDocument(async (document) => {
     // 检查文件类型是否为JavaScript/TypeScript/React
@@ -37,7 +48,7 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   // 将所有注册的事件监听器和命令添加到上下文中
-  context.subscriptions.push(translateCommand, saveListener);
+  context.subscriptions.push(translateCommand, syncCommand, saveListener);
 }
 
 /**

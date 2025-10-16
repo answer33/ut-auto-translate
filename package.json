@@ -2,7 +2,7 @@
   "name": "ut-auto-translate",
   "displayName": "ut-auto-translate",
   "description": "自动生成多语言翻译文案",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "publisher": "answer",
   "icon": "images/logo.jpg",
   "repository": {
@@ -31,7 +31,8 @@
     "onLanguage:javascript",
     "onLanguage:javascriptreact",
     "onLanguage:typescript",
-    "onLanguage:typescriptreact"
+    "onLanguage:typescriptreact",
+    "onCommand:ut-auto-translate.syncTranslations"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -39,6 +40,10 @@
       {
         "command": "ut-auto-translate.translate",
         "title": "UT: 手动触发翻译"
+      },
+      {
+        "command": "ut-auto-translate.syncTranslations",
+        "title": "UT: 一键同步翻译（从中文基准）"
       }
     ],
     "menus": {
@@ -47,6 +52,18 @@
           "command": "ut-auto-translate.translate",
           "group": "ut-auto-translate",
           "when": "editorLangId =~ /(javascript|javascriptreact|typescript|typescriptreact)/"
+        },
+        {
+          "command": "ut-auto-translate.syncTranslations",
+          "group": "ut-auto-translate",
+          "when": "resourceExtname == .json && resourceFilename == zh-CN.json"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "ut-auto-translate.syncTranslations",
+          "group": "ut-auto-translate",
+          "when": "resourceExtname == .json && resourceFilename == zh-CN.json"
         }
       ]
     },
@@ -111,6 +128,16 @@
           "type": "array",
           "default": [],
           "description": "忽略的文件路径列表（支持glob模式）"
+        },
+        "ut-auto-translate.enableCache": {
+          "type": "boolean",
+          "default": true,
+          "description": "启用本地翻译缓存（减少重复翻译请求）"
+        },
+        "ut-auto-translate.batchCharLimit": {
+          "type": "number",
+          "default": 1800,
+          "description": "单次批量请求的字符限制（按总字符估算分批）"
         }
       }
     }
