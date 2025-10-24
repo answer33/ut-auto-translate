@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { AutoTranslateService } from './services/autoTranslateService';
 import { SyncTranslateService } from './services/syncTranslateService';
+import { CleanUnusedKeysService } from './services/cleanUnusedKeysService';
 
 /**
  * 插件激活时调用此方法
@@ -31,6 +32,16 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
+  // 注册命令：清理未使用的翻译键
+  const cleanUnusedCommand = vscode.commands.registerCommand('ut-auto-translate.cleanUnusedKeys', async () => {
+    try {
+      await CleanUnusedKeysService.cleanUnusedKeys();
+    } catch (error) {
+      console.error('清理未使用的翻译键失败', error);
+      vscode.window.showErrorMessage(`清理未使用的翻译键失败: ${error}`);
+    }
+  });
+
   // 注册文件保存事件监听器
   const saveListener = vscode.workspace.onDidSaveTextDocument(async (document) => {
     // 检查文件类型是否为JavaScript/TypeScript/React
@@ -48,7 +59,7 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   // 将所有注册的事件监听器和命令添加到上下文中
-  context.subscriptions.push(translateCommand, syncCommand, saveListener);
+  context.subscriptions.push(translateCommand, syncCommand, cleanUnusedCommand, saveListener);
 }
 
 /**

@@ -6,6 +6,26 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.0.4] - 2025-10-24
+
+### Added
+- 新增命令：`UT: 清理未使用的翻译键`（`ut-auto-translate.cleanUnusedKeys`）
+  - 以 `zh-CN.json` 为基准，扫描整个项目代码
+  - 自动检测未使用的翻译键（如 `intl.t('key')` / `i18next.t('key')` 不存在）
+  - 同步从所有语言文件中删除未使用的键，避免翻译文件冗余
+  - 支持编辑器和资源管理器右键菜单快捷调用
+  - 实时进度展示（检查 N 个键 → 显示删除结果）
+- 新增配置：`ut-auto-translate.noTranslateKeys`
+  - 支持配置不需要翻译的键（如品牌名、专有名词、技术术语）
+  - 配置的键会被添加到所有语言文件，但值直接使用键本身（不翻译）
+  - 支持通配符匹配（如 `"GitHub*"` 匹配所有以 GitHub 开头的键）
+  - 同时支持自动翻译和一键同步翻译两种场景
+
+### Changed
+- 移除配置：`ut-auto-translate.ignoreKeys`（功能与 `noTranslateKeys` 重复）
+  - `ignoreKeys` 会导致键缺失，`noTranslateKeys` 则添加键但不翻译
+  - 迁移建议：将 `ignoreKeys` 配置迁移到 `noTranslateKeys`
+
 ## [0.0.3] - 2025-10-14
 
 ### Added

@@ -63,15 +63,15 @@ export class IntlKeyExtractor {
   }
 
   /**
-   * 检查键是否应该被忽略
+   * 检查键是否不需要翻译（直接使用键本身作为值）
    * @param key 多语言键
-   * @returns 是否应该忽略
+   * @returns 是否不需要翻译
    */
-  public static shouldIgnoreKey(key: string): boolean {
+  public static shouldNotTranslateKey(key: string): boolean {
     const config = vscode.workspace.getConfiguration("ut-auto-translate");
-    const ignoreKeys = config.get<string[]>("ignoreKeys", []);
+    const noTranslateKeys = config.get<string[]>("noTranslateKeys", []);
 
-    return ignoreKeys.some((pattern) => {
+    return noTranslateKeys.some((pattern) => {
       // 支持通配符匹配
       if (pattern.includes("*")) {
         const regex = new RegExp("^" + pattern.replace(/\*/g, ".*") + "$");

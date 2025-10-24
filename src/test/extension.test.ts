@@ -99,16 +99,16 @@ suite('Extension Test Suite', () => {
     assert.strictEqual(keys.includes('count'), true);
   });
 
-  test('shouldIgnoreKey 能够正确判断是否忽略键', async () => {
+  test('shouldNotTranslateKey 能够正确判断是否不翻译键', async () => {
     // 模拟配置
-    await vscode.workspace.getConfiguration('ut-auto-translate').update('ignoreKeys', ['test*', 'ignore'], true);
+    await vscode.workspace.getConfiguration('ut-auto-translate').update('noTranslateKeys', ['test*', 'GitHub'], true);
 
-    assert.strictEqual(IntlKeyExtractor.shouldIgnoreKey('test'), true);
-    assert.strictEqual(IntlKeyExtractor.shouldIgnoreKey('test.key'), true);
-    assert.strictEqual(IntlKeyExtractor.shouldIgnoreKey('ignore'), true);
-    assert.strictEqual(IntlKeyExtractor.shouldIgnoreKey('welcome'), false);
+    assert.strictEqual(IntlKeyExtractor.shouldNotTranslateKey('test'), true);
+    assert.strictEqual(IntlKeyExtractor.shouldNotTranslateKey('test.key'), true);
+    assert.strictEqual(IntlKeyExtractor.shouldNotTranslateKey('GitHub'), true);
+    assert.strictEqual(IntlKeyExtractor.shouldNotTranslateKey('welcome'), false);
 
     // 恢复配置
-    await vscode.workspace.getConfiguration('ut-auto-translate').update('ignoreKeys', [], true);
+    await vscode.workspace.getConfiguration('ut-auto-translate').update('noTranslateKeys', [], true);
   });
 });

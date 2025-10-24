@@ -165,8 +165,8 @@ export class AutoTranslateService {
       return [];
     }
 
-    // 过滤掉应该被忽略的键
-    return keys.filter(key => !IntlKeyExtractor.shouldIgnoreKey(key));
+    // 返回所有提取到的键（不再过滤，noTranslateKeys 会在翻译时处理）
+    return keys;
   }
 
   /**
@@ -247,16 +247,38 @@ export class AutoTranslateService {
            continue;
          }
 
-         // 获取需要翻译的值（中文原文）
-         const valuesToTranslate = keysToTranslateForTarget.map(key => key); // 直接使用中文键作为源文本
+         // 分离需要翻译和不需要翻译的键
+         const keysNeedTranslation: string[] = [];
+         const keysNoTranslation: string[] = [];
 
-         // 翻译键值对
-         const translatedEntries = await TranslationService.translateKeyValues(
-           keysToTranslateForTarget,
-           valuesToTranslate,
-           defaultLanguage,
-           targetLanguage
-         );
+         keysToTranslateForTarget.forEach(key => {
+           if (IntlKeyExtractor.shouldNotTranslateKey(key)) {
+             keysNoTranslation.push(key);
+           } else {
+             keysNeedTranslation.push(key);
+           }
+         });
+
+         const translatedEntries: Record<string, string> = {};
+
+         // 处理需要翻译的键
+         if (keysNeedTranslation.length > 0) {
+           const valuesToTranslate = keysNeedTranslation.map(key => key); // 直接使用中文键作为源文本
+           const translated = await TranslationService.translateKeyValues(
+             keysNeedTranslation,
+             valuesToTranslate,
+             defaultLanguage,
+             targetLanguage
+           );
+           Object.assign(translatedEntries, translated);
+         }
+
+         // 处理不需要翻译的键（直接使用键本身作为值）
+         if (keysNoTranslation.length > 0) {
+           keysNoTranslation.forEach(key => {
+             translatedEntries[key] = key; // 不翻译，直接使用键作为值
+           });
+         }
 
          // 更新目标语言的多语言文件
          const updatedTargetContent = LocaleFileUtils.mergeLocaleContent(

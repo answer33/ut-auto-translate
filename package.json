@@ -2,7 +2,7 @@
   "name": "ut-auto-translate",
   "displayName": "ut-auto-translate",
   "description": "自动生成多语言翻译文案",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "publisher": "answer",
   "icon": "images/logo.jpg",
   "repository": {
@@ -32,7 +32,8 @@
     "onLanguage:javascriptreact",
     "onLanguage:typescript",
     "onLanguage:typescriptreact",
-    "onCommand:ut-auto-translate.syncTranslations"
+    "onCommand:ut-auto-translate.syncTranslations",
+    "onCommand:ut-auto-translate.cleanUnusedKeys"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -44,6 +45,10 @@
       {
         "command": "ut-auto-translate.syncTranslations",
         "title": "UT: 一键同步翻译（从中文基准）"
+      },
+      {
+        "command": "ut-auto-translate.cleanUnusedKeys",
+        "title": "UT: 清理未使用的翻译键"
       }
     ],
     "menus": {
@@ -57,11 +62,21 @@
           "command": "ut-auto-translate.syncTranslations",
           "group": "ut-auto-translate",
           "when": "resourceExtname == .json && resourceFilename == zh-CN.json"
+        },
+        {
+          "command": "ut-auto-translate.cleanUnusedKeys",
+          "group": "ut-auto-translate",
+          "when": "resourceExtname == .json && resourceFilename == zh-CN.json"
         }
       ],
       "explorer/context": [
         {
           "command": "ut-auto-translate.syncTranslations",
+          "group": "ut-auto-translate",
+          "when": "resourceExtname == .json && resourceFilename == zh-CN.json"
+        },
+        {
+          "command": "ut-auto-translate.cleanUnusedKeys",
           "group": "ut-auto-translate",
           "when": "resourceExtname == .json && resourceFilename == zh-CN.json"
         }
@@ -119,10 +134,10 @@
           "default": "",
           "description": "SiliconFlow API密钥（如未设置将使用默认密钥）"
         },
-        "ut-auto-translate.ignoreKeys": {
+        "ut-auto-translate.noTranslateKeys": {
           "type": "array",
           "default": [],
-          "description": "忽略的键名列表"
+          "description": "不翻译的键名列表（键的值直接使用键本身，支持通配符）"
         },
         "ut-auto-translate.ignorePaths": {
           "type": "array",

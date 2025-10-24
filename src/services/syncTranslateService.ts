@@ -46,7 +46,7 @@ export class SyncTranslateService {
     const baselinePath = LocaleFileUtils.getLocaleFilePath(workspaceRoot, defaultLanguage);
     const baseline = LocaleFileUtils.readLocaleFile(baselinePath);
 
-    const baselineKeys = Object.keys(baseline).filter((k) => !IntlKeyExtractor.shouldIgnoreKey(k));
+    const baselineKeys = Object.keys(baseline);
     if (baselineKeys.length === 0) {
       vscode.window.showInformationMessage(`默认语言文件(${defaultLanguage})暂无可同步的键`);
       return;
@@ -97,21 +97,52 @@ export class SyncTranslateService {
 
               const targetPath = LocaleFileUtils.getLocaleFilePath(workspaceRoot, lang);
               const targetContent = LocaleFileUtils.readLocaleFile(targetPath);
-              const valuesToTranslate = missingKeys.map((k) => baseline[k] ?? k);
 
-              const translated = await TranslationService.translateKeyValues(
-                missingKeys,
-                valuesToTranslate,
-                defaultLanguage,
-                lang,
-                (delta) => {
-                  processed += delta;
+              // 分离需要翻译和不需要翻译的键
+              const keysNeedTranslation: string[] = [];
+              const keysNoTranslation: string[] = [];
+
+              missingKeys.forEach(key => {
+                if (IntlKeyExtractor.shouldNotTranslateKey(key)) {
+                  keysNoTranslation.push(key);
+                } else {
+                  keysNeedTranslation.push(key);
+                }
+              });
+
+              const translated: Record<string, string> = {};
+
+              // 处理需要翻译的键
+              if (keysNeedTranslation.length > 0) {
+                const valuesToTranslate = keysNeedTranslation.map((k) => baseline[k] ?? k);
+                const translatedEntries = await TranslationService.translateKeyValues(
+                  keysNeedTranslation,
+                  valuesToTranslate,
+                  defaultLanguage,
+                  lang,
+                  (delta) => {
+                    processed += delta;
+                    const percent = Math.min(100, Math.floor((processed / totalMissing) * 100));
+                    const inc = Math.max(0, percent - lastPercent);
+                    lastPercent = percent;
+                    progress.report({ message: `${percent}%`, increment: inc });
+                  }
+                );
+                Object.assign(translated, translatedEntries);
+              }
+
+              // 处理不需要翻译的键（直接使用键本身作为值）
+              if (keysNoTranslation.length > 0) {
+                keysNoTranslation.forEach(key => {
+                  translated[key] = key; // 不翻译，直接使用键作为值
+                  // 更新进度
+                  processed += 1;
                   const percent = Math.min(100, Math.floor((processed / totalMissing) * 100));
                   const inc = Math.max(0, percent - lastPercent);
                   lastPercent = percent;
                   progress.report({ message: `${percent}%`, increment: inc });
-                }
-              );
+                });
+              }
 
               const updated = LocaleFileUtils.mergeLocaleContent(targetContent, translated);
               LocaleFileUtils.writeLocaleFile(targetPath, updated);
